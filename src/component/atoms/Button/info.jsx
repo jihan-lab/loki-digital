@@ -1,10 +1,10 @@
 import React from 'react';
 import {StyleSheet, TouchableOpacity, View, Image} from 'react-native';
 
-export default function Info() {
+export default function Info({onPress}) {
   return (
     <View>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={onPress}>
         <Image
           source={require('../../../image/Info.png')}
           style={{width: 35, height: 35}}

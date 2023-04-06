@@ -1,9 +1,10 @@
 import axios from 'axios';
-import {React, useState} from 'react';
-import {StyleSheet, Text, View, Image} from 'react-native';
+import {React, useState, useEffect} from 'react';
+import {StyleSheet, Text, View, Image, Alert} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {Button, Gap, Input} from '../../component';
-import {colors, fonts, storeData} from '../../utils';
+import {colors, fonts, getData, showError, storeData} from '../../utils';
+import {useDispatch} from 'react-redux';
 
 export default function Login({navigation}) {
   const [user, setUser] = useState('');
@@ -11,12 +12,28 @@ export default function Login({navigation}) {
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(true);
 
+  const dispatch = useDispatch();
+
   const seePw = () => {
     setShowPw(!showPw);
   };
 
+  const getDataUserFormLocal = async () => {
+    const result = await getData('user').then(res => {
+      // setUser(res);
+      // setToken(res.token);
+      return res;
+    });
+
+    console.log([result]);
+    if (result) {
+      return navigation.replace('Home');
+    }
+  };
+
   const Login = async () => {
     try {
+      dispatch({type: 'SET_LOADING', value: true});
       const response = await axios.post(
         'http://loki-api.boncabo.com/auth/login',
         {username: user, password: password},
@@ -26,17 +43,27 @@ export default function Login({navigation}) {
           },
         },
       );
+      dispatch({type: 'SET_LOADING', value: false});
       if (response.data.data !== null) {
         console.log(response);
         storeData('user', response.data);
-        navigation.replace('MainApp');
+        storeData('passwordUser', password);
+        dispatch({type: 'SET_LOADING', value: false});
+        navigation.replace('Home');
+      } else {
+        showError('Username dan Password Salah');
       }
     } catch (error) {
       if (error) {
+        dispatch({type: 'SET_LOADING', value: false});
         console.log(error.message);
       }
     }
   };
+
+  useEffect(() => {
+    getDataUserFormLocal();
+  }, []);
 
   return (
     <View style={styles.page}>

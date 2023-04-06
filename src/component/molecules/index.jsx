@@ -1,6 +1,6 @@
-import Navigation from './Navigation';
 import Header from './Header';
 import Loading from './Loading';
 import Modals from './Modals';
+import ModalCom from './ModalComponent';
 
-export {Navigation, Header, Loading, Modals};
+export {Header, Loading, Modals, ModalCom};

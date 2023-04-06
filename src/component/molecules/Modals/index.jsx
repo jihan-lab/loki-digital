@@ -1,104 +1,129 @@
 import {default as React, useEffect, useState} from 'react';
-import {
-  Alert,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-} from 'react-native';
-import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
-import {useDispatch} from 'react-redux';
-import {getData} from '../../../utils';
-import axios from 'axios';
+import {Modal, StyleSheet, Text, View} from 'react-native';
 
-export default function Modals({number}) {
+import {colors, getData, showError, storeData} from '../../../utils';
+import {Button, Call, Gap, Status} from '../../atoms';
+
+export default function Modals({user, number}) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [token, setToken] = useState('');
-  const [temp, setTemp] = useState(false);
+  const [startDuration, setStartDuration] = useState('');
+  const [finishDuration, setFinishDuration] = useState('');
+  const [durationCalculation, setDurationCalculation] = useState('');
+  const [targetPhone, setTargetPhone] = useState('');
+  const [allContactStorage, setAllContactStorage] = useState([]);
+  const [reportContact, setReportContact] = useState('');
 
-  const dispatch = useDispatch();
-  const calling = () => {
-    RNImmediatePhoneCall.immediatePhoneCall(number);
-  };
-
-  const getValue = async () => {
-    dispatch({type: 'SET_LOADING', value: true});
-    // try {
-    //   await axios.post(
-    //     'http://loki-api.boncabo.com/phone/update_phone',
-    //     {phone: number, action: n},
-    //     {
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     },
-    //   );
-    //   console.log('number :', number);
-    //   console.log('action :', n);
-    //   dispatch({type: 'SET_LOADING', value: false});
-    // } catch (error) {
-    //   dispatch({type: 'SET_LOADING', value: false});
-    //   console.log(error);
-    // }
-    setModalVisible(!modalVisible);
-    dispatch({type: 'SET_LOADING', value: false});
-  };
-  useEffect(() => {
-    getData('user').then(res => {
-      setToken(res.token);
+  const getReportContactStorage = async () => {
+    const response = await getData('reportContact').then(res => {
+      return res;
     });
-  }, []);
+
+    if (response === undefined) {
+      setReportContact(0);
+    } else {
+      setReportContact(response.length);
+    }
+  };
+
+  const getAllContactStorage = async () => {
+    const result = await getData('allContact').then(res => {
+      return res;
+    });
+    setAllContactStorage(result);
+  };
+
+  const data = {
+    data: [
+      {
+        phone: '0989',
+        action: '2',
+      },
+      {
+        phone: '0989',
+        action: '2',
+      },
+    ],
+  };
+
+  const getTargetPhoneStorage = async () => {
+    const result = await getData('targetPhone').then(res => {
+      return res;
+    });
+    if (result) {
+      setTargetPhone(result.target_handphone);
+    } else {
+      setTargetPhone(0);
+    }
+  };
+
+  const getPhoneNumber = async () => {
+    getAllContactStorage();
+    const temp = allContactStorage.pop();
+    storeData('allContact', allContactStorage);
+    storeData('targetPhone', temp);
+    getTargetPhoneStorage();
+  };
+
+  useEffect(() => {
+    getReportContactStorage();
+    getAllContactStorage();
+    getTargetPhoneStorage();
+  }, [
+    targetPhone,
+    startDuration,
+    finishDuration,
+    durationCalculation,
+    reportContact,
+  ]);
+
   return (
-    <View style={styles.centeredView}>
+    <View style={Style.centeredView}>
       <Modal
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
           setModalVisible(!modalVisible);
         }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => getValue(1)}>
-              <Text style={styles.textStyle}>1</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>2</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>3</Text>
-            </Pressable>
+        <View style={Style.centeredViewModal}>
+          <View style={Style.modalView}>
+            <Text style={Style.modalText}>Status No. Telp</Text>
+            <View style={Style.modalContent}>
+              <Status
+                style={[Style.buttonModal, Style.buttonClose]}
+                onPress={() => report(1)}
+                status="active"
+              />
+              <Gap width={10} />
+              <Status
+                style={[Style.buttonModal, Style.buttonClose]}
+                onPress={() => report(3)}
+                status="notListed"
+              />
+              <Gap width={10} />
+              <Status
+                style={[Style.buttonModal, Style.buttonClose]}
+                onPress={() => report(2)}
+                status="notActive"
+              />
+            </View>
           </View>
         </View>
       </Modal>
-      <Pressable style={styles.buttonCall} onPress={calling}>
-        <Image
-          source={require('../../../image/PhoneCall.png')}
-          style={{width: 45, height: 45}}
-        />
-        <Text style={{fontWeight: 'bold', color: '#FFF', fontSize: 20}}>
-          Call
-        </Text>
-      </Pressable>
+      <Call onPress={calling} />
+      <Gap height={20} />
+      <Button
+        onPress={sendAllDataReportToServer}
+        title={`Kirim semua data laporan : ${reportContact}`}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const Style = StyleSheet.create({
+  // Modal Style
   buttonCall: {
     alignSelf: 'center',
-    width: 230,
     height: 90,
     alignItems: 'center',
     justifyContent: 'center',
@@ -107,18 +132,16 @@ const styles = StyleSheet.create({
     marginTop: 23,
     paddingVertical: 12,
   },
-  centeredView: {
+  centeredViewModal: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
   },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: 'center',
+    // alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -128,16 +151,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  button: {
+  buttonModal: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
   },
   buttonOpen: {
-    backgroundColor: '#F194FF',
+    // backgroundColor: '#F194FF',
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.text.primary,
   },
   textStyle: {
     color: 'white',
@@ -147,5 +170,9 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+  },
+  modalContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
 });

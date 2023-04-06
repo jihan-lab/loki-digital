@@ -1,39 +1,34 @@
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createStackNavigator} from '@react-navigation/stack';
-import {History, Home, Login} from '../pages';
+import {Home, Login} from '../pages';
 
 const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
+// const Drawer = createDrawerNavigator();
 
-const MainApp = () => {
-  return (
-    <Drawer.Navigator initialRouteName="Home">
-      <Drawer.Screen
-        options={{headerShown: false}}
-        name="Home"
-        component={Home}
-      />
-      <Drawer.Screen
-        options={{headerShown: false}}
-        name="Login"
-        component={Login}
-      />
-      <Drawer.Screen
-        options={{headerShown: false}}
-        name="History"
-        component={History}
-      />
-    </Drawer.Navigator>
-  );
-};
+// const MainApp = () => {
+//   return (
+//     <Drawer.Navigator initialRouteName="Home">
+//       <Drawer.Screen
+//         options={{headerShown: false}}
+//         name="Home"
+//         component={Home}
+//       />
+//       <Drawer.Screen
+//         options={{headerShown: false}}
+//         name="Login"
+//         component={Login}
+//       />
+//     </Drawer.Navigator>
+//   );
+// };
 
 const Router = () => {
   return (
     <>
-      <Stack.Navigator initialRouteName="MainApp">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
-          name="MainApp"
-          component={MainApp}
+          name="Home"
+          component={Home}
           options={{headerShown: false}}
         />
         <Stack.Screen

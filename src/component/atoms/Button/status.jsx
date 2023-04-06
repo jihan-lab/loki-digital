@@ -1,35 +1,38 @@
 import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
 import React from 'react';
+import {colors} from '../../../utils';
 
-export default function Status({status}) {
+export default function Status({status, onPress}) {
   if (status === 'active') {
     return (
-      <TouchableOpacity style={styles.Button_Aktif}>
+      <TouchableOpacity onPress={onPress} style={styles.Button_Aktif}>
         <Image
           source={require('../../../image/Chek.png')}
-          style={{width: 35, height: 35}}
+          style={{width: 25, height: 25}}
         />
-        <Text style={{color: '#228BE6'}}>Aktif</Text>
+        <Text style={{color: colors.white}}>Aktif</Text>
       </TouchableOpacity>
     );
   }
   if (status === 'notActive') {
     return (
-      <TouchableOpacity style={styles.Button_tdf}>
+      <TouchableOpacity onPress={onPress} style={styles.Button_tdf}>
         <Image
           source={require('../../../image/nophone.png')}
-          style={{width: 35, height: 35}}
+          style={{width: 25, height: 25}}
         />
-        <Text style={{color: '#DC9424'}}>Tidak Terdaftar</Text>
+        <Text style={{color: colors.white, fontSize: 11, paddingHorizontal: 1}}>
+          Tidak Terdaftar
+        </Text>
       </TouchableOpacity>
     );
   }
   if (status === 'notListed') {
     return (
-      <TouchableOpacity style={styles.Button_noUser}>
+      <TouchableOpacity onPress={onPress} style={styles.Button_noUser}>
         <Image
           source={require('../../../image/nouser.png')}
-          style={{width: 35, height: 35}}
+          style={{width: 25, height: 25}}
         />
         <Text style={{color: '#FF532F'}}>Tidak Aktif</Text>
       </TouchableOpacity>
@@ -39,33 +42,37 @@ export default function Status({status}) {
 
 const styles = StyleSheet.create({
   Button_noUser: {
-    width: 110,
+    width: 90,
     height: 62,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
     borderRadius: 15,
-    borderColor: '#FF532F',
+
+    borderColor: '#DC9424',
+    backgroundColor: 'yellow',
   },
   Button_Aktif: {
-    width: 100,
+    width: 90,
     height: 62,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
     borderRadius: 15,
-    borderColor: '#228BE6',
+    borderColor: colors.success,
+    backgroundColor: colors.success,
   },
   Button_tdf: {
-    width: 110,
+    width: 90,
     height: 62,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
     borderRadius: 15,
-    borderColor: '#DC9424',
+    borderColor: colors.error,
+    backgroundColor: colors.error,
   },
 });

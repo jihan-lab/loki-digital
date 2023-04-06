@@ -1,5 +1,5 @@
-import History from './History/Index';
+// import History from './History/Index';
 import Home from './Home/index';
 import Login from './Login';
 
-export {Home, History, Login};
+export {Home, Login};

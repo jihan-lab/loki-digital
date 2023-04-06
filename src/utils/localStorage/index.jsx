@@ -29,3 +29,18 @@ export const deleteData = async key => {
     // error reading value
   }
 };
+
+const dummy = [
+  {phone: '6285735110475', action: 3, user: 'lukman', duration: '00:25'},
+  {phone: '62858440101063', action: 3, user: 'lukman', duration: '00:25'},
+  {phone: '6281596963901', action: 3, user: 'lukman', duration: '00:25'},
+  {phone: '6281528593927', action: 1, user: 'lukman', duration: '00:25'},
+];
+
+// const dummy2 =
+// {
+//   {phone: '6285735110475', action: 3},
+//   {phone: '62858440101063', action: 3},
+//   {phone: '6281596963901', action: 3},
+//   {phone: '6281528593927', action: 1},
+// }
