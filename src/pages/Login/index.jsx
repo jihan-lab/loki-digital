@@ -20,8 +20,6 @@ export default function Login({navigation}) {
 
   const getDataUserFormLocal = async () => {
     const result = await getData('user').then(res => {
-      // setUser(res);
-      // setToken(res.token);
       return res;
     });
 
@@ -90,7 +88,7 @@ export default function Login({navigation}) {
         )}
       </TouchableOpacity>
       <Gap height={40} />
-      <Button title="Sign In" onPress={Login} />
+      <Button title="Masuk" onPress={Login} />
     </View>
   );
 }

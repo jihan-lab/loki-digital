@@ -6,7 +6,7 @@ export default function Loading() {
   return (
     <View style={styles.wrapper}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text style={styles.text}>Loading...</Text>
+      <Text style={styles.text}>Mohon Tunggu...</Text>
     </View>
   );
 }

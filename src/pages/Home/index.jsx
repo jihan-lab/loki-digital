@@ -5,8 +5,9 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
   View,
+  Image,
+  Linking,
 } from 'react-native';
 import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
 
@@ -21,9 +22,11 @@ import {
   showSuccess,
   storeData,
 } from '../../utils';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const Home = ({navigation}) => {
   const [user, setUser] = useState([]);
+  const [userName, setUserName] = useState('');
   const [point, setPoint] = useState('');
   const [token, setToken] = useState('');
   const [startDuration, setStartDuration] = useState('');
@@ -96,6 +99,7 @@ const Home = ({navigation}) => {
   const getDataUserFormLocal = async () => {
     await getData('user').then(res => {
       setUser(res);
+      setUserName(res.username);
       setToken(res.token);
       return res;
     });
@@ -121,16 +125,16 @@ const Home = ({navigation}) => {
 
   // Modal Komponen
   const calling = () => {
+    RNImmediatePhoneCall.immediatePhoneCall(`+${targetPhone}`);
     setModalVisible(true);
     // Start Duration
     const date = new Date();
     setStartDuration(date.getTime());
-    RNImmediatePhoneCall.immediatePhoneCall(`+${targetPhone}`);
   };
 
   const getReward = async () => {
     try {
-      const reward = await axios
+      await axios
         .get(`http://loki-api.boncabo.com/user/detail/${user.user_id}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -138,12 +142,10 @@ const Home = ({navigation}) => {
           },
         })
         .then(response => {
-          console.log(response.data.data.user_poin);
           setPoint(response.data.data.user_poin);
           return response;
         });
     } catch (error) {
-      console.log('hello');
       console.log(error);
     }
   };
@@ -165,7 +167,6 @@ const Home = ({navigation}) => {
     response.map(item => {
       data.data.push(item);
     });
-    console.log(data);
     dispatch({type: 'SET_LOADING', value: true});
     try {
       await axios
@@ -176,7 +177,6 @@ const Home = ({navigation}) => {
           },
         })
         .then(response => {
-          console.log(response);
           showSuccess(`Data laporan berhasil dikirim, anda mendapatkan POIN`);
         });
     } catch (error) {
@@ -211,6 +211,11 @@ const Home = ({navigation}) => {
     getReportContactStorage();
 
     dispatch({type: 'SET_LOADING', value: false});
+    dispatch({type: 'SET_REWARD', value: 350});
+    dispatch({type: 'SET_COIN_ANIMATION', value: true});
+    setTimeout(() => {
+      getReward();
+    }, 2000);
   };
 
   const report = async n => {
@@ -222,18 +227,14 @@ const Home = ({navigation}) => {
     if (startDuration === null) {
       setStartDuration(date.getTime());
       start = date.getTime();
-      console.log('nah kan');
     } else {
       start = startDuration;
-      console.log('na loh');
     }
     const duration = finish - start;
-    console.log(duration);
     const minutes = Math.floor(duration / 60000);
     const second = ((duration % 60000) / 1000).toFixed(0);
     const time = minutes + ':' + (second < 10 ? '0' : '') + second;
     setDurationCalculation(time);
-    console.log(time);
 
     const result = await getData('reportContact').then(res => {
       return res;
@@ -261,11 +262,12 @@ const Home = ({navigation}) => {
       });
     }
     storeData('reportContact', temp);
-    console.log('duration : ', time);
     const response = await getData('reportContact').then(res => {
       return res;
     });
-    console.log('reportContact', response);
+    if (response.length === 50) {
+      deleteData('targetPhone');
+    }
     setModalVisible(false);
     getReportContactStorage();
     getPhoneNumber();
@@ -295,68 +297,54 @@ const Home = ({navigation}) => {
               <View style={Style.modalContent}>
                 <Status
                   style={[Style.buttonModal, Style.buttonClose]}
-                  onPress={() => report(1)}
-                  status="active"
+                  onPress={() => report('TERDAFTAR')}
+                  status="aktif"
                 />
                 <Gap width={10} />
                 <Status
                   style={[Style.buttonModal, Style.buttonClose]}
-                  onPress={() => report(3)}
-                  status="notListed"
+                  onPress={() => report('TIDAK_AKTIF')}
+                  status="tidakAktif"
                 />
                 <Gap width={10} />
                 <Status
                   style={[Style.buttonModal, Style.buttonClose]}
-                  onPress={() => report(2)}
-                  status="notActive"
+                  onPress={() => report('TIDAK_TERDAFTAR')}
+                  status="tidakTerdaftar"
                 />
               </View>
             </View>
           </View>
         </Modal>
-        <Call onPress={calling} />
+        {reportContact === 50 || targetPhone === 0 ? (
+          ''
+        ) : (
+          <Call onPress={calling} />
+        )}
+
         <Gap height={20} />
-        <Button
-          onPress={sendAllDataReportToServer}
-          title={`Kirim semua data laporan : ${reportContact}`}
-        />
+        {targetPhone !== 0 && (
+          <Button title={`POIN : ${reportContact}`} type="reportAlert" />
+        )}
+        {reportContact === 50 && (
+          <>
+            <Button
+              onPress={sendAllDataReportToServer}
+              type="send"
+              title={`POIN : ${reportContact}`}
+            />
+            <Gap height={20} />
+            <Button
+              title="Anda telah memeriksa 50 Telp. Harap ambil reward anda"
+              type="reportAlert"
+            />
+          </>
+        )}
       </View>
     );
   };
 
   useEffect(() => {
-    setTimeout(async () => {
-      const password = await getData('passwordUser').then(res => {
-        return res;
-      });
-      try {
-        dispatch({type: 'SET_LOADING', value: true});
-        const response = await axios.post(
-          'http://loki-api.boncabo.com/auth/login',
-          {username: user.username, password: password},
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-        dispatch({type: 'SET_LOADING', value: false});
-        if (response.data.data !== null) {
-          console.log(response);
-          storeData('user', response.data);
-          storeData('passwordUser', password);
-          dispatch({type: 'SET_LOADING', value: false});
-        } else {
-          console.log('Ada Kesalahan di mengambil data Login');
-        }
-      } catch (error) {
-        if (error) {
-          dispatch({type: 'SET_LOADING', value: false});
-          console.log(error.message);
-        }
-      }
-    }, 300000);
-
     getReward();
     getDataUserFormLocal();
     getTargetPhoneStorage();
@@ -371,7 +359,9 @@ const Home = ({navigation}) => {
         <View style={Style.box_2}>
           <View style={Style.box_1}>
             <View style={Style.box_phone}>
-              <Text style={Style.font_title}>Hai, {user?.username}</Text>
+              <Text style={Style.font_title}>
+                Hai, {userName.charAt(0).toUpperCase() + userName.slice(1)}
+              </Text>
               <ModalCom />
             </View>
             <Text
@@ -379,10 +369,13 @@ const Home = ({navigation}) => {
                 color: colors.text.primary,
                 textAlign: 'right',
               }}>
-              No Telp tersisa : {allContactStorage}
+              {reportContact === 50 && `No Telp tersisa : ${allContactStorage}`}
+              {targetPhone !== 0 &&
+                `No Telp tersisa : ${allContactStorage + 1}`}
             </Text>
             <Text style={Style.text}>Reward Kamu</Text>
             <View style={Style.InputText}>
+              <Text>Reward Kamu Berjumlah : </Text>
               <Text
                 style={{
                   color: colors.text.primary,
@@ -390,23 +383,51 @@ const Home = ({navigation}) => {
                   fontFamily: fonts.primary[600],
                   marginBottom: 15,
                 }}>
-                Rp. {(10 * point).toLocaleString()}
+                Rp. {(1 * point).toLocaleString()}
               </Text>
-              <Text>Point Kamu Berjumlah : {point} Point</Text>
+              {point && point >= 10000 && (
+                <TouchableOpacity style={Style.cairkanDana}>
+                  <Text>Cairkan Dana</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
-        {targetPhone === 0 ? '' : <Modals user={user} number={targetPhone} />}
+        <View style={Style.wrapButtonSend}>
+          <Modals user={user} number={targetPhone} />
 
-        <Gap height={20} />
+          <Gap height={20} />
 
-        {allContactStorage || reportContact ? (
-          ''
-        ) : (
-          <Button onPress={getAllDataPhoneServer} title="Ambil Nomor Telp" />
-        )}
-        <Gap height={50} />
-        {/* <Button onPress={deleteDataDummy} title="delete" /> */}
+          {allContactStorage || reportContact ? (
+            ''
+          ) : (
+            <Button onPress={getAllDataPhoneServer} title="Ambil Nomor Telp" />
+          )}
+          <Gap height={50} />
+          {/* <Button onPress={deleteDataDummy} title="delete" /> */}
+          <View style={Style.waWrap}>
+            <TouchableOpacity
+              style={Style.wa}
+              onPress={() =>
+                Linking.openURL(
+                  'https://chat.whatsapp.com/IoxohbBw0td49zZMbX2Ek1',
+                )
+              }>
+              <Image
+                source={require('../../image/whatsapp.png')}
+                style={{width: 30, height: 30}}
+              />
+              <Text
+                style={{
+                  color: colors.text.primary,
+                  marginTop: 5,
+                  fontFamily: fonts.primary[500],
+                }}>
+                Bantuan
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -414,6 +435,27 @@ const Home = ({navigation}) => {
 
 // #FFAB00
 const Style = StyleSheet.create({
+  cairkanDana: {
+    backgroundColor: 'yellow',
+    alignItems: 'center',
+    borderRadius: 120 / 2,
+    alignSelf: 'flex-end',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    width: 120,
+    marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      height: 2,
+      width: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  wrapButtonSend: {
+    flex: 1,
+  },
   Button_action: {
     marginTop: 20,
     flexDirection: 'row',
@@ -485,6 +527,18 @@ const Style = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  waWrap: {
+    marginTop: -20,
+    fontSize: 10,
+    alignItems: 'flex-end',
+    flex: 1,
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
+    marginBottom: 30,
+  },
+  wa: {
+    alignItems: 'center',
+  },
 
   // Modal Style
   buttonCall: {
@@ -533,6 +587,9 @@ const Style = StyleSheet.create({
     textAlign: 'center',
   },
   modalText: {
+    color: colors.text.primary,
+    fontFamily: fonts.primary[600],
+    fontSize: 20,
     marginBottom: 15,
     textAlign: 'center',
   },

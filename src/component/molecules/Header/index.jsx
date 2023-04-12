@@ -7,7 +7,6 @@ export default function Header({title}) {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{title}</Text>
-      <Gap width={24} />
     </View>
   );
 }

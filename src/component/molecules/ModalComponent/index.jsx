@@ -1,19 +1,23 @@
 import React, {useState} from 'react';
-import {
-  Image,
-  Linking,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {colors} from '../../../utils';
+import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {useDispatch} from 'react-redux';
+import {colors, fonts} from '../../../utils';
 import {Info} from '../../atoms';
 
 export default function ModalCom() {
   const [modalVisible, setModalVisible] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const info = () => {
+    setModalVisible(true);
+    dispatch({type: 'SET_INFO', value: true});
+  };
+
+  const close = () => {
+    setModalVisible(!modalVisible);
+    dispatch({type: 'SET_INFO', value: false});
+  };
   return (
     <>
       <View style={styles.centeredView}>
@@ -21,48 +25,50 @@ export default function ModalCom() {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}>
+          onRequestClose={close}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                <Text style={styles.modalText}>Info Mass seh</Text>
+                <Text style={styles.modalText}>LOKI Digital 1.04.09</Text>
                 <View style={styles.modalContainer}>
-                  <View style={styles.waWrap}>
-                    <Pressable
-                      style={styles.wa}
-                      onPress={() =>
-                        Linking.openURL(
-                          'https://chat.whatsapp.com/IoxohbBw0td49zZMbX2Ek1',
-                        )
-                      }>
-                      <Image
-                        source={require('../../../image/whatsapp.png')}
-                        style={{width: 30, height: 30}}
-                      />
-                      <Text>Bantuan</Text>
-                    </Pressable>
-                  </View>
-                  <View></View>
                   <Text style={styles.textModal}>
                     Hal - Hal yang harus diperhatikan :
                   </Text>
-                  <Text>
-                    {`
-Tidak Terdaftar : 
-* TSEL : Nomor yang anda tuju tidak dapat
-dihubungi, mohon periksa kembali nomor tujuan anda 
-
-Tidak Aktif: * Nomor yang anda tuju sedang tidak aktif atau berada
-di luar jangkauan
-
-Terdaftar:
-* Dering
-* Sedang Sibuk
-* Rekam pesan anda..
-* Saat ditelpon Langsung mati
-`}
+                  <Text
+                    style={{
+                      color: colors.text.primary,
+                      fontFamily: fonts.primary[500],
+                      lineHeight: 24,
+                      // textAlign: 'justify',
+                    }}>
+                    <Text style={styles.mainFont}>
+                      {'\n '}Tidak Terdaftar :{'\n '}
+                    </Text>
+                    <Text>
+                      TSEL : Nomor yang anda tuju tidak dapat {'\n '}dihubungi,
+                      mohon periksa kembali nomor {'\n '}tujuan anda{'\n '}
+                    </Text>
+                    <Text style={styles.mainFont}>
+                      {'\n '}Tidak Aktif: {'\n '}
+                    </Text>
+                    <Text>
+                      Nomor yang anda tuju sedang tidak aktif {'\n '}atau berada
+                      di luar jangkauan{'\n '}
+                    </Text>
+                    <Text style={styles.mainFont}>
+                      {'\n '}Terdaftar: {'\n '}
+                    </Text>
+                    <Text>
+                      * Dering {'\n '}* Sedang Sibuk {'\n '}* Rekam pesan anda..{' '}
+                      {'\n '}* Saat ditelpon Langsung mati{'\n '}
+                    </Text>
+                    <Text style={styles.mainFont}>
+                      {'\n '}Akun otomatis disuspend apabila {'\n '}ditemukan
+                      10% kesalahan {'\n '}pemeriksaan{'\n '}
+                    </Text>
+                    <Text style={styles.mainFont}>
+                      {'\n '}Minimal Reward Klaim : {'\n '}Rp 10.000{'\n '}
+                    </Text>
                   </Text>
                 </View>
               </View>
@@ -70,28 +76,16 @@ Terdaftar:
           </ScrollView>
         </Modal>
       </View>
-      <Info onPress={() => setModalVisible(true)} />
+      <Info onPress={info} />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  textModal: {
-    textAlign: 'justify',
-    fontSize: 14,
-    lineHeight: 22,
-    marginTop: 20,
-  },
-  modalContainer: {
-    height: '100%',
-    width: '100%',
-  },
-  waWrap: {
-    fontSize: 10,
-    alignItems: 'flex-end',
-  },
-  wa: {
-    alignItems: 'center',
+  mainFont: {
+    fontFamily: fonts.primary[600],
+    fontSize: 18,
+    textAlign: 'left',
   },
   centeredView: {
     flex: 1,
@@ -100,8 +94,6 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    width: '100%',
-    height: '100%',
     margin: 20,
     backgroundColor: colors.success,
     borderRadius: 20,
@@ -116,24 +108,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: '#F194FF',
-  },
-  buttonClose: {
-    backgroundColor: '#2196F3',
-  },
   textStyle: {
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  textModal: {
+    textAlign: 'center',
+    fontSize: 15,
+    fontFamily: fonts.primary[400],
+    color: colors.text.primary,
+  },
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+    fontSize: 20,
+    fontFamily: fonts.primary[700],
+    color: colors.text.primary,
   },
 });
