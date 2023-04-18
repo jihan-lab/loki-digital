@@ -19,6 +19,7 @@ export default function Input({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
+        keyboardType={keyBoardType}
       />
     </View>
   );

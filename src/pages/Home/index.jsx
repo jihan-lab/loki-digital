@@ -7,6 +7,7 @@ import {
   Text,
   View,
   Image,
+  PermissionsAndroid,
   Linking,
 } from 'react-native';
 import RNImmediatePhoneCall from 'react-native-immediate-phone-call';
@@ -23,6 +24,7 @@ import {
   storeData,
 } from '../../utils';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import CallRecord from 'react-native-call-record';
 
 const Home = ({navigation}) => {
   const [user, setUser] = useState([]);
@@ -38,6 +40,26 @@ const Home = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const dispatch = useDispatch();
+
+  const getUserFromServer = async () => {
+    try {
+      await axios
+        .get(`http://loki-api.boncabo.com/user/detail/${user.user_id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user.token}`,
+          },
+        })
+        .then(res => {
+          if (res.data.data.user_status === 'SUSPEND') {
+            deleteData('user');
+            navigation.replace('Login');
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getAllContactStorage = async () => {
     const result = await getData('allContact').then(res => {
@@ -124,10 +146,11 @@ const Home = ({navigation}) => {
   };
 
   // Modal Komponen
-  const calling = () => {
+  const calling = async () => {
     RNImmediatePhoneCall.immediatePhoneCall(`+${targetPhone}`);
-    setModalVisible(true);
-    // Start Duration
+    setTimeout(() => {
+      setModalVisible(true);
+    }, 1000);
     const date = new Date();
     setStartDuration(date.getTime());
   };
@@ -350,6 +373,7 @@ const Home = ({navigation}) => {
     getTargetPhoneStorage();
     getReportContactStorage();
     getAllContactStorage();
+    getUserFromServer();
   }, [targetPhone, reportContact, point]);
 
   return (
@@ -386,9 +410,12 @@ const Home = ({navigation}) => {
                 Rp. {(1 * point).toLocaleString()}
               </Text>
               {point && point >= 10000 && (
-                <TouchableOpacity style={Style.cairkanDana}>
-                  <Text>Cairkan Dana</Text>
-                </TouchableOpacity>
+                <View style={Style.cairkanDana}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Payment', user)}>
+                    <Text>Cairkan Dana</Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
           </View>
@@ -442,7 +469,7 @@ const Style = StyleSheet.create({
     alignSelf: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    width: 120,
+    // width: 120,
     marginRight: 10,
     shadowColor: '#000',
     shadowOffset: {

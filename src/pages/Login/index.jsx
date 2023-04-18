@@ -52,6 +52,10 @@ export default function Login({navigation}) {
         showError('Username dan Password Salah');
       }
     } catch (error) {
+      dispatch({type: 'SET_LOADING', value: false});
+      if (error.response.data.message === 'User not found') {
+        return showError('Akun Tidak Ditemukan');
+      }
       if (error) {
         dispatch({type: 'SET_LOADING', value: false});
         console.log(error.message);
